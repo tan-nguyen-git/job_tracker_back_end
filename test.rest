@@ -1,0 +1,33 @@
+### Send get application
+GET http://localhost:3000/api/applications
+
+### Create an application
+POST http://localhost:3000/api/applications
+Content-Type: application/json
+
+{
+    "id": "1",
+    "companyName": "Ggsdf",
+    "jobTitle": "Software Engineer Intern",
+    "category": "SWE",
+    "dateApplied": "2026-10-20",
+    "status": "Applied",
+    "jobUrl": "https://example.com/job1"
+}
+
+### Update an application with its id
+PUT http://localhost:3000/api/applications/1
+Content-Type: application/json
+
+{
+    "id": "2",
+    "companyName": "ABCd",
+    "jobTitle": "Software Engineer Intern",
+    "category": "SWE",
+    "dateApplied": "2026-10-20",
+    "status": "Applied",
+    "jobUrl": "https://example.com/job1"
+}
+
+### Delete and applications with its id
+DELETE http://localhost:3000/api/applications/2
