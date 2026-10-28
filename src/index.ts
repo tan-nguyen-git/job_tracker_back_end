@@ -32,7 +32,7 @@ app.post("/api/applications", (req, res) => {
   const getApps = db.prepare("SELECT * FROM applications");
   const applications = getApps.all();
 
-  if (applications.some((application) => application.id === req.body.id)) {
+  if (applications.some((application) => application === req.body.id)) {
     return res.status(409).json({ message: "Application ID already exists" });
   }
   const { id, companyName, jobTitle, category, dateApplied, status, jobUrl } = req.body;
