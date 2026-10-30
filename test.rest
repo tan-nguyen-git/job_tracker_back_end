@@ -31,3 +31,12 @@ Content-Type: application/json
 
 ### Delete and applications with its id
 DELETE http://localhost:3000/api/applications/2
+
+### Sent regist req
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+    "email": "example@gmail.com",
+    "password": "concho123"
+}
