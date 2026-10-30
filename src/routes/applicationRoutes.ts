@@ -19,71 +19,81 @@ function isApplication(value: unknown): value is Application {
   );
 }
 
-router.get("/api/applications", (_req, res) => {
-  const query = db.prepare("SELECT * FROM applications");
-  const applications = query.all();
-  res.json(applications);
+router.get("/", (_req, res) => {
+  //extract user id from res.locals.userId
+  const userId = res.locals.userId as string;
+  const applications = db
+    .prepare(
+      "SELECT id, companyName, jobTitle, category, dateApplied, status, jobUrl FROM applications WHERE user_id = ?",
+    )
+    .all(userId);
+
+  return res.json(applications);
 });
 
-router.post("/api/applications", (req, res) => {
+router.post("/", (req, res) => {
   if (!isApplication(req.body)) {
     return res.status(400).json({ message: "Invalid application data" });
   }
-  const getApps = db.prepare("SELECT * FROM applications");
-  const applications = getApps.all();
 
-  if (applications.some((application) => application === req.body.id)) {
+  const userId = res.locals.userId as string;
+  const { id, companyName, jobTitle, category, dateApplied, status, jobUrl } = req.body;
+  const existingApplication = db.prepare("SELECT id FROM applications WHERE id = ?").get(id);
+
+  if (existingApplication) {
     return res.status(409).json({ message: "Application ID already exists" });
   }
-  const { id, companyName, jobTitle, category, dateApplied, status, jobUrl } = req.body;
-  const query = db.prepare(`
-    INSERT INTO applications 
-    (id, companyName, jobTitle, category, dateApplied,status, jobUrl)
-    values(?, ?, ?, ?, ?, ?,?)`);
-  query.run(id, companyName, jobTitle, category, dateApplied, status, jobUrl);
-  return res.status(201).json(req.body);
+
+  db.prepare(`
+    INSERT INTO applications
+      (id, user_id, companyName, jobTitle, category, dateApplied, status, jobUrl)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, userId, companyName, jobTitle, category, dateApplied, status, jobUrl);
+
+  return res.status(201).json({ ...req.body, user_id: userId });
 });
 
-router.put("/api/applications/:id", (req, res) => {
+router.put("/:id", (req, res) => {
   if (!isApplication(req.body)) {
     return res.status(400).json({ message: "Invalid application data" });
   }
-  const editedApp = req.body;
-  const insert = db.prepare(`
-        UPDATE applications
-        SET companyName = ?,
-        jobTitle =?,
-        category =?,
-        dateApplied=?,
-        status=?,
-        jobUrl=?
-        WHERE id= ?
-    `);
-  const result = insert.run(
-    editedApp.companyName,
-    editedApp.jobTitle,
-    editedApp.category,
-    editedApp.dateApplied,
-    editedApp.status,
-    editedApp.jobUrl,
-    req.params.id,
-  );
+
+  const userId = res.locals.userId as string;
+  const editedApplication: Application = { ...req.body, id: req.params.id };
+  const result = db
+    .prepare(`
+    UPDATE applications
+    SET companyName = ?,
+        jobTitle = ?,
+        category = ?,
+        dateApplied = ?,
+        status = ?,
+        jobUrl = ?
+    WHERE id = ? AND user_id = ?
+  `)
+    .run(
+      editedApplication.companyName,
+      editedApplication.jobTitle,
+      editedApplication.category,
+      editedApplication.dateApplied,
+      editedApplication.status,
+      editedApplication.jobUrl,
+      req.params.id,
+      userId,
+    );
 
   if (result.changes === 0) {
     return res.status(404).json({ message: "Application not found" });
   }
 
-  // The URL identifies the record, so it remains the ID even if the body differs.
-
-  return res.status(200).json();
+  return res.status(200).json(editedApplication);
 });
 
-router.delete("/api/applications/:id", (req, res) => {
-  const insert = db.prepare(`
-        DELETE FROM applications
-        WHERE id= ?
-    `);
-  const result = insert.run(req.params.id);
+router.delete("/:id", (req, res) => {
+  const userId = res.locals.userId as string;
+  const result = db
+    .prepare("DELETE FROM applications WHERE id = ? AND user_id = ?")
+    .run(req.params.id, userId);
 
   if (result.changes === 0) {
     return res.status(404).json({ message: "Application not found" });

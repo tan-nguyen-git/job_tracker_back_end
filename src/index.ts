@@ -1,15 +1,14 @@
+import "dotenv/config";
 import express from "express";
-import type { Application } from "./types/applications.js";
-import { db } from "./db.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import { requireAuth } from "./middleware/requireAuth.js";
 
 const app = express();
 app.use(express.json());
 
-app.use("/api/applications", applicationRoutes);
 app.use("/api/auth", authRoutes);
-app.use(express.json());
+app.use("/api/applications", requireAuth, applicationRoutes);
 
 //listening in port 3000
 app.listen(3000, () => {

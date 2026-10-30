@@ -1,42 +1,21 @@
-### Send get application
-GET http://localhost:3000/api/applications
-
-### Create an application
-POST http://localhost:3000/api/applications
-Content-Type: application/json
-
-{
-    "id": "{{$guid}}",
-    "companyName": "Ggsdf",
-    "jobTitle": "Software Engineer Intern",
-    "category": "SWE",
-    "dateApplied": "2026-10-20",
-    "status": "Applied",
-    "jobUrl": "https://example.com/job1"
-}
-
-### Update an application with its id
-PUT http://localhost:3000/api/applications/1
-Content-Type: application/json
-
-{
-    "id": "1",
-    "companyName": "ABCd",
-    "jobTitle": "Software Engineer Intern",
-    "category": "SWE",
-    "dateApplied": "2026-10-20",
-    "status": "Applied",
-    "jobUrl": "https://example.com/job1"
-}
-
-### Delete and applications with its id
-DELETE http://localhost:3000/api/applications/2
 
 ### Sent regist req
-POST http://localhost:3000/auth/register
+POST http://localhost:3000/api/auth/register
 Content-Type: application/json
 
 {
     "email": "example@gmail.com",
     "password": "concho123"
 }
+
+###Sent login req
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "example@gmail.com",
+    "password": "concho123"
+}
+
+### Check the signed-in user
+GET http://localhost:3000/api/auth/me
